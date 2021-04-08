@@ -10,7 +10,8 @@
 
 namespace my_nn {
 
-/* A is of size (n, l), B of size (l, m), result of size (n, m) */
+/* valarray matrix multiplication. Placeholder for a better implementation later.
+ * A is of size (n, l), B of size (l, m), result of size (n, m) */
 std::valarray<double> matmul(int n, int m, int l,
         std::valarray<double> const &A, 
         std::valarray<double> const &B)
@@ -26,6 +27,8 @@ std::valarray<double> matmul(int n, int m, int l,
     return C;
 }
 
+/* Constructor with He initialization of the weights
+ */
 Layer::Layer(const int fanin, const int nodes, Activation activation)
     : fanin{fanin}, nodes{nodes}, weights(fanin*nodes), activation{activation}
 {
@@ -38,8 +41,12 @@ Layer::Layer(const int fanin, const int nodes, Activation activation)
     }
 }
 
-auto relu = [](double x) { return x > 0.0 ? x : 0.0; };
+/* the ReLU function */
+double relu(double x) { return x > 0.0 ? x : 0.0; }
 
+/* Application of the layer is Matrix multiplication of the input vector by the
+ * weights followed by the activation function term by term.
+ */
 std::valarray<double> Layer::operator()(
         std::valarray<double> const &input
         ) const & 
