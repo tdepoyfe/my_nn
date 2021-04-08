@@ -26,7 +26,7 @@ class Layer {
         Layer(const int fanin, const int nodes, 
                 Activation activation = Activation::None);
         /* Access function to the weights. Linear access, will be deleted later */
-        double& operator[](int i) { return weights[i]; }
+        double const &operator[](int i) { return weights[i]; }
         /* The layer can be applied as a function to an input vector,
          * return the result. */
         std::valarray<double> operator()(std::valarray<double> const &input) const &;
