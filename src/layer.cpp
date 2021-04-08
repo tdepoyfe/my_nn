@@ -26,8 +26,8 @@ std::valarray<double> matmul(int n, int m, int l,
     return C;
 }
 
-Layer::Layer(const int fanin, const int nodes)
-    : fanin{fanin}, nodes{nodes}, weights(fanin*nodes)
+Layer::Layer(const int fanin, const int nodes, Activation activation)
+    : fanin{fanin}, nodes{nodes}, weights(fanin*nodes), activation{activation}
 {
     std::default_random_engine generator;
     std::normal_distribution<double> distribution(
@@ -38,13 +38,20 @@ Layer::Layer(const int fanin, const int nodes)
     }
 }
 
+auto relu = [](double x) { return x > 0.0 ? x : 0.0; };
+
 std::valarray<double> Layer::operator()(
         std::valarray<double> const &input
         ) const & 
 {
-    std::valarray<double> activations =  matmul(nodes, 1, fanin, weights, input);
-    auto ReLU = [](double x) { return x > 0.0 ? x : 0.0; };
-    return activations.apply(ReLU);
+    std::valarray<double> act =  matmul(nodes, 1, fanin, weights, input);
+
+    switch (activation) {
+        case Activation::None:
+            return act;
+        case Activation::ReLU:
+            return act.apply(relu);
+    }
 }
 
 }   // namespace my_nn
