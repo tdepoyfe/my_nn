@@ -11,11 +11,12 @@ namespace my_nn {
 
 class Layer {
     public:
-        Layer(int s);
+        Layer(const int fanin, const int nodes);
         double& operator[](int i) { return weights[i]; }
         std::valarray<double> operator()(std::valarray<double> const &input) const &;
     private:
-        const int size;
+        const int fanin;
+        const int nodes;
         std::valarray<double> weights;
 };
 
