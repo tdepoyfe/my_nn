@@ -3,6 +3,7 @@
  *      Implementation for the layer class
  */
 
+#include <cstdlib>
 #include <random>
 #include <valarray>
 
@@ -13,8 +14,8 @@ namespace my_nn {
 /* valarray matrix multiplication. Placeholder for a better implementation later.
  * A is of size (n, l), B of size (l, m), result of size (n, m) */
 std::valarray<double> matmul(int n, int m, int l,
-        std::valarray<double> const &A, 
-        std::valarray<double> const &B)
+        const std::valarray<double> &A, 
+        const std::valarray<double> &B)
 {
     std::valarray<double> C(0.0, n * l);
     for (int i = 0; i < n; i++) {
@@ -29,35 +30,38 @@ std::valarray<double> matmul(int n, int m, int l,
 
 /* Constructor with He initialization of the weights
  */
-Layer::Layer(const int fanin, const int nodes, Activation activation)
-    : fanin{fanin}, nodes_number{nodes}, weights(fanin*nodes_number), activation{activation}
+Layer::Layer(std::size_t fanin, std::size_t nodes, Activation activation)
+    : fanin{fanin}, nodes_p{nodes}, 
+    weights_p(fanin*nodes), activation_p{activation}
 {
     std::default_random_engine generator;
-    std::normal_distribution<double> distribution(
-            0.0, 2 / static_cast<double>(fanin)
+    std::normal_distribution<elem_type> distribution(
+            0.0, 2 / static_cast<elem_type>(fanin)
             );
-    for (auto &x: weights) {
+    for (auto &x: weights_p) {
         x = distribution(generator);
     }
 }
 
 /* the ReLU function */
-double relu(double x) { return x > 0.0 ? x : 0.0; }
+elem_type ReLU(elem_type x) { return x > 0.0 ? x : 0.0; }
 
 /* Application of the layer is Matrix multiplication of the input vector by the
  * weights followed by the activation function term by term.
  */
-std::valarray<double> Layer::operator()(
-        std::valarray<double> const &input
-        ) const & 
+container Layer::operator()(
+        const container &input
+        ) const 
 {
-    std::valarray<double> act =  matmul(nodes_number, 1, fanin, weights, input);
+    container act =  matmul(nodes_p, 1, fanin, weights_p, input);
 
-    switch (activation) {
+    switch (activation_p) {
         case Activation::None:
             return act;
         case Activation::ReLU:
-            return act.apply(relu);
+            return act.apply(ReLU);
+        // TODO: add exeption in default case
+        // case default:
     }
 }
 

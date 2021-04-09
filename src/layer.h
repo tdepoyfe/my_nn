@@ -5,10 +5,13 @@
 #ifndef LAYER_H
 #define LAYER_H
 
+#include <cstdlib>
 #include <valarray>
 
-
 namespace my_nn {
+
+using elem_type = double;
+using container = std::valarray<elem_type>;
 
 /* An enum to hold the type of activation function for the layer. */
 enum class Activation { None, ReLU };
@@ -17,27 +20,27 @@ enum class Activation { None, ReLU };
  * 
  * A class modeling a neural network layer. Holds its own weights.
  */
-
 class Layer {
     public:
         /* Constructor; needs the previous layer size (`fanin`) to initialize
          * the weights. No activation function by default.
          */
-        explicit Layer(const int fanin, const int nodes, 
+        Layer(std::size_t fanin, std::size_t nodes, 
                 Activation activation = Activation::None);
 
-        /* Access function to the weights. Linear access, will be deleted later */
-        double const &operator[](int i) { return weights[i]; }
         /* The layer can be applied as a function to an input vector,
          * return the result. */
-        std::valarray<double> operator()(std::valarray<double> const &input) const &;
+        container operator()(const container &input) const;
 
-        int nodes() const & { return nodes_number; }
+        std::size_t nodes() const { return nodes_p; }
+        const container &weights() const { return weights_p; }
+        Activation activation() const { return activation_p; }
+        
     private:
-        const int fanin;
-        const int nodes_number;
-        std::valarray<double> weights;
-        Activation activation;
+        const std::size_t fanin;
+        const std::size_t nodes_p;
+        container weights_p;
+        Activation activation_p;
 };
 
 } // namespace my_nn

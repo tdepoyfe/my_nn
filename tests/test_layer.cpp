@@ -3,8 +3,6 @@
  * unit tests for Layer class
  */
 
-#include "valarray"
-
 #include "gtest/gtest.h"
 
 #include "layer.h"
@@ -16,7 +14,7 @@ using namespace my_nn;
 TEST(Layer, LayerConstruct) {
     ASSERT_NO_THROW({ 
         Layer l(1, 1);
-        double x = l[0];
+        double x = l.weights()[0];
     });
     SUCCEED();
 }
@@ -25,7 +23,7 @@ TEST(Layer, LayerConstruct) {
  */
 TEST(Layer, Layer0Stable) {
     Layer l(100, 100, Activation::ReLU);
-    std::valarray<double> input(0.0, 100);
+    container input(0.0, 100);
     auto output = l(input);
     for (double x : output) {
         EXPECT_DOUBLE_EQ(x, 0.0);

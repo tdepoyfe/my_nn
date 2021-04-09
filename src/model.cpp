@@ -3,13 +3,15 @@
  *      implementation file for the Model class
  */
 
+#include <cstdlib>
+
 #include "layer.h"
 #include "model.h"
 
 namespace my_nn {
 
-void Model::addLayer(const int nodes, Activation activation) & {
-    int fanin = 0;
+void Model::addLayer(std::size_t nodes, Activation activation) {
+    std::size_t fanin = 0;
     if (layers.size() == 0) {
         fanin = input_size;
     } else {
