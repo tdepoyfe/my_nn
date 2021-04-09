@@ -12,7 +12,7 @@ enable_testing()
 
 add_executable(test_layer test_layer.cpp)
 
-target_link_libraries(test_layer layer)
+target_link_libraries(test_layer neural_net)
 target_link_libraries(test_layer gtest_main)
 
 include(GoogleTest)

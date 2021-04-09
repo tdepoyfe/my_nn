@@ -23,16 +23,19 @@ class Layer {
         /* Constructor; needs the previous layer size (`fanin`) to initialize
          * the weights. No activation function by default.
          */
-        Layer(const int fanin, const int nodes, 
+        explicit Layer(const int fanin, const int nodes, 
                 Activation activation = Activation::None);
+
         /* Access function to the weights. Linear access, will be deleted later */
         double const &operator[](int i) { return weights[i]; }
         /* The layer can be applied as a function to an input vector,
          * return the result. */
         std::valarray<double> operator()(std::valarray<double> const &input) const &;
+
+        int nodes() const & { return nodes_number; }
     private:
         const int fanin;
-        const int nodes;
+        const int nodes_number;
         std::valarray<double> weights;
         Activation activation;
 };

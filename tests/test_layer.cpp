@@ -2,6 +2,7 @@
  *
  * unit tests for Layer class
  */
+
 #include "valarray"
 
 #include "gtest/gtest.h"

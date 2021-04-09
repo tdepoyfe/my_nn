@@ -30,7 +30,7 @@ std::valarray<double> matmul(int n, int m, int l,
 /* Constructor with He initialization of the weights
  */
 Layer::Layer(const int fanin, const int nodes, Activation activation)
-    : fanin{fanin}, nodes{nodes}, weights(fanin*nodes), activation{activation}
+    : fanin{fanin}, nodes_number{nodes}, weights(fanin*nodes_number), activation{activation}
 {
     std::default_random_engine generator;
     std::normal_distribution<double> distribution(
@@ -51,7 +51,7 @@ std::valarray<double> Layer::operator()(
         std::valarray<double> const &input
         ) const & 
 {
-    std::valarray<double> act =  matmul(nodes, 1, fanin, weights, input);
+    std::valarray<double> act =  matmul(nodes_number, 1, fanin, weights, input);
 
     switch (activation) {
         case Activation::None:
