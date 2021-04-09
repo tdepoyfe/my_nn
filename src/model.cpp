@@ -20,4 +20,12 @@ void Model::addLayer(std::size_t nodes, Activation activation) {
     layers.push_back(Layer(fanin, nodes, activation));
 }
 
+container Model::operator()(const container &input) const {
+    container scratch = input;
+    for (const Layer &layer : layers) {
+        scratch = layer(scratch);
+    }
+    return scratch;
+}
+
 } // namespace my_nn
