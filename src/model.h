@@ -29,12 +29,12 @@ class Model {
         container operator()(const container &input) const;
         /* Compute the loss function on the difference between the result
          * of applying the model to `input` and the provided `targets`.
-         * The loss function will be deduced from the last layer.
          */
         elem_type score(const container &input, const container &targets) const;
 
         /* Accessor function to specific layers */
         const Layer &get_layer(std::size_t index) const { return layers[index]; }
+        /* Accessor function to loss type */
         LossFunction loss() const { return loss_p; }
     private:
         const std::size_t input_size;

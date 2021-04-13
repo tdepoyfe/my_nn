@@ -15,5 +15,11 @@ add_executable(test_layer test_layer.cpp)
 target_link_libraries(test_layer neural_net)
 target_link_libraries(test_layer gtest_main)
 
+add_executable(test_model test_model.cpp)
+
+target_link_libraries(test_model neural_net)
+target_link_libraries(test_model gtest_main)
+
 include(GoogleTest)
 gtest_discover_tests(test_layer)
+gtest_discover_tests(test_model)
