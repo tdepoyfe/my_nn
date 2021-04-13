@@ -4,6 +4,7 @@
  */
 
 #include <cstdlib>
+#include <stdexcept>
 
 #include "layer.h"
 #include "model.h"
@@ -26,6 +27,19 @@ container Model::operator()(const container &input) const {
         scratch = layer(scratch);
     }
     return scratch;
+}
+
+elem_type Model::score(const container &inputs, const container &targets) const {
+    auto results = operator()(inputs);
+    switch (loss_p) {
+        case LossFunction::LstSq:
+            return std::pow(results - targets, 2).sum();
+        case LossFunction::LogLoss:
+            return (targets * std::log(results) + 
+                    (1-targets) * std::log(1-results)).sum();
+        default:
+            throw std::invalid_argument("No loss function set");
+    }
 }
 
 } // namespace my_nn
