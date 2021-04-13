@@ -25,6 +25,8 @@ class Model {
         /* Add a Layer at the end of the model, connected to the previous layer */
         void addLayer(std::size_t nodes, 
                 Activation activation = Activation::None); 
+        /* Set the loss function */
+        void setLoss(LossFunction loss) { loss_p = loss; }
         /* Apply the model to some input */
         container operator()(const container &input) const;
         /* Compute the loss function on the difference between the result
