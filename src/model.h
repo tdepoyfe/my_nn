@@ -34,6 +34,11 @@ class Model {
          */
         elem_type score(const container &input, const container &targets) const;
 
+        /* Backpropagates on one input to compute the gradient. 
+         * Assumes the right pairing between output activation and loss.
+         */
+        // container gradient(const container &input, const container & targets) const;
+
         /* Accessor function to specific layers */
         const Layer &get_layer(std::size_t index) const { return layers[index]; }
         /* Accessor function to loss type */

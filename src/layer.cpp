@@ -5,6 +5,7 @@
 
 #include <cstdlib>
 #include <random>
+#include <stdexcept>
 #include <valarray>
 
 #include "layer.h"
@@ -32,7 +33,7 @@ std::valarray<double> matmul(int n, int m, int l,
  */
 Layer::Layer(std::size_t fanin, std::size_t nodes, Activation activation)
     : fanin{fanin}, nodes_p{nodes}, 
-    weights_p(fanin*nodes), activation_p{activation}
+    weights_p(fanin*nodes), bias_p(0.0, nodes), activation_p{activation}
 {
     std::default_random_engine generator;
     std::normal_distribution<elem_type> distribution(
@@ -53,15 +54,15 @@ container Layer::operator()(
         const container &input
         ) const 
 {
-    container act =  matmul(nodes_p, 1, fanin, weights_p, input);
+    container act =  matmul(nodes_p, 1, fanin, weights_p, input) + bias_p;
 
     switch (activation_p) {
         case Activation::None:
             return act;
         case Activation::ReLU:
             return act.apply(ReLU);
-        // TODO: add exeption in default case
-        // case default:
+        default:
+            throw std::invalid_argument("No activation set");
     }
 }
 

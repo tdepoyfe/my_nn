@@ -45,8 +45,8 @@ TEST(Model, Model0Stable) {
     container labels {0.0};
     auto output = m(input);
     for (double x : output) {
-        EXPECT_DOUBLE_EQ(x, 0.0);
+        ASSERT_NEAR(x, 0.0, 1e-10);
     }
     auto loss = m.score(input, labels);
-    EXPECT_DOUBLE_EQ(loss, 0.0);
+    ASSERT_NEAR(loss, 0.0, 1e-10);
 }

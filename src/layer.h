@@ -34,12 +34,14 @@ class Layer {
 
         std::size_t nodes() const { return nodes_p; }
         const container &weights() const { return weights_p; }
+        const container &bias() const { return bias_p; }
         Activation activation() const { return activation_p; }
         
     private:
         const std::size_t fanin;
         const std::size_t nodes_p;
         container weights_p;
+        container bias_p;
         Activation activation_p;
 };
 

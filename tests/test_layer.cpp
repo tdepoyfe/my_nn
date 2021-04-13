@@ -26,7 +26,7 @@ TEST(Layer, Layer0Stable) {
     container input(0.0, 100);
     auto output = l(input);
     for (double x : output) {
-        EXPECT_DOUBLE_EQ(x, 0.0);
+        ASSERT_NEAR(x, 0.0, 1e-10); // Using assert_near to do absolute error since we compare with 0.
     }
 }
     
