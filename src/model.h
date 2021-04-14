@@ -37,12 +37,15 @@ class Model {
         /* Backpropagates on one input to compute the gradient. 
          * Assumes the right pairing between output activation and loss.
          */
-        // container gradient(const container &input, const container & targets) const;
+        std::vector<container> gradient(
+                const container &input, const container & targets) const;
 
         /* Accessor function to specific layers */
         const Layer &get_layer(std::size_t index) const { return layers[index]; }
         /* Accessor function to loss type */
         LossFunction loss() const { return loss_p; }
+        /* Total number of nodes */
+        std::size_t node_number() const;
     private:
         const std::size_t input_size;
         std::vector<Layer> layers;

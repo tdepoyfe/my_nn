@@ -45,8 +45,8 @@ TEST(Model, Model0Stable) {
     container labels {0.0};
     auto output = m(input);
     for (double x : output) {
-        ASSERT_NEAR(x, 0.0, 1e-10);
+        ASSERT_NEAR(x, 0.0, 1e-100);
     }
     auto loss = m.score(input, labels);
-    ASSERT_NEAR(loss, 0.0, 1e-10);
+    ASSERT_NEAR(loss, 0.0, 1e-100);
 }

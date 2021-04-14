@@ -16,6 +16,10 @@ using container = std::valarray<elem_type>;
 /* An enum to hold the type of activation function for the layer. */
 enum class Activation { None, ReLU };
 
+/* the ReLU function */
+elem_type ReLU(elem_type x);
+elem_type der_ReLU(elem_type x);
+
 /* Layer
  * 
  * A class modeling a neural network layer. Holds its own weights.
@@ -31,11 +35,16 @@ class Layer {
         /* The layer can be applied as a function to an input vector,
          * return the result. */
         container operator()(const container &input) const;
+        /* Apply the layer multiplication */
+        container mult(const container &input) const;
+        /* Returns the transpose of the weights and biases */
+        container transp(const container &input) const;
 
-        std::size_t nodes() const { return nodes_p; }
-        const container &weights() const { return weights_p; }
-        const container &bias() const { return bias_p; }
-        Activation activation() const { return activation_p; }
+        auto nodes() const { return nodes_p; }
+        auto input() const { return fanin; }
+        const auto &weights() const { return weights_p; }
+        const auto &bias() const { return bias_p; }
+        auto activation() const { return activation_p; }
         
     private:
         const std::size_t fanin;
