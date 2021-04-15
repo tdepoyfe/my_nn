@@ -40,6 +40,9 @@ class Model {
         std::vector<container> gradient(
                 const container &input, const container & targets) const;
 
+        /* Modify a layer's weights and biases */
+        void add_to_weights(std::vector<container>);
+
         /* Accessor function to specific layers */
         const Layer &get_layer(std::size_t index) const { return layers[index]; }
         /* Accessor function to loss type */

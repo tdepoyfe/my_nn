@@ -119,4 +119,18 @@ std::vector<container> Model::gradient(
     return gradients;
 }
 
+void Model::add_to_weights(std::vector<container> variations) {
+    for (int i = 0; i < layers.size(); i++) {
+        auto layer = layers[i];
+        auto variation = variations[i];
+        auto m = layer.input();
+        for (int j = 0; j < layer.weights().size(); j++) {
+            layer.weights()[j] += variation[j + j / m];
+        }
+        for (int j = 0; j< layer.bias().size(); j++) {
+            layer.bias()[j] += variation[(j+1) * (m+1)];
+        }
+    }
+}
+
 } // namespace my_nn

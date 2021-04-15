@@ -43,7 +43,9 @@ class Layer {
         auto nodes() const { return nodes_p; }
         auto input() const { return fanin; }
         const auto &weights() const { return weights_p; }
+        auto &weights() { return weights_p; }
         const auto &bias() const { return bias_p; }
+        auto &bias() { return bias_p; }
         auto activation() const { return activation_p; }
         
     private:

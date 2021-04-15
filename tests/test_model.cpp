@@ -50,3 +50,23 @@ TEST(Model, Model0Stable) {
     auto loss = m.score(input, labels);
     ASSERT_NEAR(loss, 0.0, 1e-100);
 }
+
+/* Check that the gradient procedure works by comparing with finite differences
+ */
+TEST(Model, ModelGradient) {
+    elem_type epsilon = 0.01;
+    Model m(1);
+    m.addLayer(1, Activation::ReLU);
+    m.addLayer(1);
+    m.setLoss(LossFunction::LstSq);
+    container input(0.5, 1);
+    container label(0.5, 1);
+    auto output = m.score(input, label);
+    auto gradient = m.gradient(input, label)[0][0];
+    std::vector<container> variations = { container {epsilon, 0.0}, 
+                                            container {0.0, 0.0}};
+    m.add_to_weights(variations);
+    auto var_output = m.score(input, label);
+    auto var_grad = (var_output - output) / epsilon;
+    ASSERT_NEAR(gradient, var_grad, 0.01);
+}
