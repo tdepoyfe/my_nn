@@ -4,6 +4,7 @@
  */
 
 #include <cstdlib>
+#include <random>
 #include <stdexcept>
 #include <vector>
 
@@ -119,7 +120,7 @@ std::vector<container> Model::gradient(
     return gradients;
 }
 
-void Model::add_to_weights(std::vector<container> variations) {
+void Model::add_to_weights(const std::vector<container> variations) {
     for (int i = 0; i < layers.size(); i++) {
         auto layer = layers[i];
         auto variation = variations[i];
@@ -129,6 +130,35 @@ void Model::add_to_weights(std::vector<container> variations) {
         }
         for (int j = 0; j< layer.bias().size(); j++) {
             layer.bias()[j] += variation[(j+1) * (m+1)];
+        }
+    }
+}
+
+void Model::remove_from_weights(const std::vector<container> variations) {
+    for (int i = 0; i < layers.size(); i++) {
+        auto layer = layers[i];
+        auto variation = variations[i];
+        auto m = layer.input();
+        for (int j = 0; j < layer.weights().size(); j++) {
+            layer.weights()[j] -= variation[j + j / m];
+        }
+        for (int j = 0; j< layer.bias().size(); j++) {
+            layer.bias()[j] -= variation[(j+1) * (m+1)];
+        }
+    }
+}
+void Model::train(const std::vector<std::pair<container, container>> instances,
+            std::size_t epochs) {
+    auto inst_number = instances.size();
+    std::default_random_engine generator;
+    std::uniform_int_distribution<std::size_t> distribution(0, inst_number-1);
+    for (int i = 0; i < epochs; i++) {
+        for (int j = 0; j < inst_number; j++) {
+            auto index = distribution(generator);
+            auto input = instances[index].first;
+            auto labels = instances[index].second;
+            auto grad = gradient(input, labels);
+            remove_from_weights(grad);
         }
     }
 }

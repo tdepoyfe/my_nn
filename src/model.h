@@ -39,9 +39,15 @@ class Model {
          */
         std::vector<container> gradient(
                 const container &input, const container & targets) const;
-
         /* Modify a layer's weights and biases */
-        void add_to_weights(std::vector<container>);
+        void add_to_weights(const std::vector<container> variations);
+        /* Modify a layer's weights and biases */
+        void remove_from_weights(const std::vector<container> variations);
+        /* Training schedule. Recieves labeled instances and number of epochs.
+         * Uses stochastic gradient descent for now.
+         */
+        void train(const std::vector<std::pair<container, container>> instances,
+                std::size_t epochs);
 
         /* Accessor function to specific layers */
         const Layer &get_layer(std::size_t index) const { return layers[index]; }
