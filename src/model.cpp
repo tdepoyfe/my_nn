@@ -23,71 +23,60 @@ void Model::addLayer(std::size_t nodes, Activation activation) {
     layers.push_back(Layer(fanin, nodes, activation));
 }
 
-container Model::operator()(const container &input) const {
-    container scratch = input;
+Vect Model::operator()(const Vect &input) const {
+    auto scratch = input;
     for (const Layer &layer : layers) {
         scratch = layer(scratch);
     }
     return scratch;
 }
 
-elem_type Model::score(const container &inputs, const container &targets) const {
+elem_type Model::score(const Vect &inputs, const Vect &targets) const {
     auto results = operator()(inputs);
     switch (loss_p) {
         case LossFunction::LstSq:
-            return std::pow(results - targets, 2).sum();
+            return (results - targets).squaredNorm();
         case LossFunction::LogLoss:
-            return (targets * std::log(results) + 
-                    (1-targets) * std::log(1-results)).sum();
+            return (targets.array() * results.array().log() +
+                    (1 - targets.array()) * (1 - results.array()).log()).sum();
         default:
             throw std::invalid_argument("No loss function set");
     }
 }
 
-std::size_t Model::node_number() const {
-    std::size_t number = 0;
-    for (auto &layer : layers) {
-        number += layer.nodes();
-    }
-    return number;
-}
-
-std::vector<container> Model::gradient(
-        const container &input, const container & targets) const
+std::vector<std::pair<Matr, Vect>> Model::gradient(
+        const Vect &input, const Vect &targets) const
 {
-    // this will store the result; for each layer, it is a matrix with
-    // as many lines as nodes and as many columns as inputs + 1 for the bias
-    // which will be the last column.
-    std::vector<container> gradients(layers.size());
-    // We need to store the activations of each node
-    std::vector<container> activations(layers.size());
+    // this will store the result
+    std::vector<std::pair<Matr, Vect>> gradients(layers.size());
+    // We need to store the activations of each node, then the error at each node.
+    std::vector<Vect> activations(layers.size());
     
     // forward pass
     auto scratch = input; // stores the result at the current layer
     for (int i = 0; i < layers.size(); i++) {
         auto &layer = layers[i];
         // this part initialize the gradient with each line equal to the input
-        // and a 1.0 in the last column for the bias input node.
+        // while the bias terms don't need to be initialized. (they are 
+        // implicitly equal to 1
         auto &grad = gradients[i];
-        grad = container(layer.weights().size() + layer.bias().size());
+        grad.first = Matr(layer.weights().rows(), layer.weights().cols());
         for (int j = 0; j < layer.nodes(); j++) {
-            auto fanin = layer.input() + 1; // add 1 for the bias
-            grad[ std::slice(j*fanin, fanin - 1, 1) ] = scratch;
-            grad[ (j+1)*fanin - 1 ] = 1.0;
+            grad.first.row(j) = scratch.transpose();
         }
 
         // compute the result of the layer.
         auto &acts = activations[i];
-        acts = layer.mult(scratch); // no activation function
+        acts = layer.weights() * scratch + layer.bias(); // no activation function
         switch (layer.activation()) {  // apply the activation function
                                         // then store the derivative in acts
             case Activation::None:
                 scratch = acts;
-                acts = acts.apply([](elem_type x) { return 1.0; });
+                acts = acts.array().unaryExpr([](elem_type x) { return 1.0; });
                 break;
             case Activation::ReLU:
-                scratch = acts.apply(ReLU);
-                acts = acts.apply(der_ReLU);
+                scratch = acts.array().unaryExpr(std::ref(ReLU));
+                acts = acts.array().unaryExpr(std::ref(der_ReLU));
                 break;
             default:
                 throw std::invalid_argument("No activation set");
@@ -100,54 +89,29 @@ std::vector<container> Model::gradient(
     // the deltas are stored in activations
     activations[layers.size()-1] = scratch - targets; // scratch containes the
                                                    // result of the neural net
-    for (int i = layers.size() - 2; i >= 0; i--) {
-        auto &layer = layers[i];
-        // compute the deltas by using the transpose operation and the derivative
-        // of the activation function
-        auto &delt = activations[i];
-        scratch = layer.transp(activations[i+1]);
-        delt *= scratch;
 
+    // compute the deltas by using the transpose operation and the derivative
+    // of the activation function stored in act
+    for (int i = layers.size() - 2; i >= 0; i--) {
+        auto &delt = activations[i];
+        scratch = layers[i+1].weights().transpose() * activations[i+1];
+        delt = delt.array() * scratch.array();
+    }
+
+    // collects the gradients
+    for (int i = 0; i < layers.size(); i++) {
+        auto &layer = layers[i];
+        auto &delt = activations[i];
         auto &grad = gradients[i];
-        for (int j = 0; j < layer.nodes(); j++) {
-            auto fanin = layer.input() + 1; // add 1 for the bias
-            for (int k = j*fanin; k < fanin; k++) {
-                grad[k] *= delt[j];
-            }
+        for (int j = 0; j < layer.input(); j++) {
+            grad.first.col(j) = grad.first.col(j).array() * delt.array();
         }
+        grad.second = delt;
     }
     
     return gradients;
 }
-
-void Model::add_to_weights(const std::vector<container> variations) {
-    for (int i = 0; i < layers.size(); i++) {
-        auto layer = layers[i];
-        auto variation = variations[i];
-        auto m = layer.input();
-        for (int j = 0; j < layer.weights().size(); j++) {
-            layer.weights()[j] += variation[j + j / m];
-        }
-        for (int j = 0; j< layer.bias().size(); j++) {
-            layer.bias()[j] += variation[(j+1) * (m+1)];
-        }
-    }
-}
-
-void Model::remove_from_weights(const std::vector<container> variations) {
-    for (int i = 0; i < layers.size(); i++) {
-        auto layer = layers[i];
-        auto variation = variations[i];
-        auto m = layer.input();
-        for (int j = 0; j < layer.weights().size(); j++) {
-            layer.weights()[j] -= variation[j + j / m];
-        }
-        for (int j = 0; j< layer.bias().size(); j++) {
-            layer.bias()[j] -= variation[(j+1) * (m+1)];
-        }
-    }
-}
-void Model::train(const std::vector<std::pair<container, container>> instances,
+void Model::train(const std::vector<std::pair<Vect, Vect>> instances,
             std::size_t epochs) {
     auto inst_number = instances.size();
     std::default_random_engine generator;
@@ -158,7 +122,10 @@ void Model::train(const std::vector<std::pair<container, container>> instances,
             auto input = instances[index].first;
             auto labels = instances[index].second;
             auto grad = gradient(input, labels);
-            remove_from_weights(grad);
+            for (int k = 0; k < layers.size(); k++) {
+                layers[k].weights() -= grad[k].first;
+                layers[k].bias() -= grad[k].second;
+            }
         }
     }
 }

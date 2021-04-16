@@ -6,12 +6,15 @@
 #define LAYER_H
 
 #include <cstdlib>
-#include <valarray>
+
+#include "Eigen/Dense"
 
 namespace my_nn {
 
 using elem_type = double;
-using container = std::valarray<elem_type>;
+// a matrix with dynamically assigned dimensions.
+using Matr = Eigen::Matrix<elem_type, Eigen::Dynamic, Eigen::Dynamic>;
+using Vect = Eigen::Matrix<elem_type, Eigen::Dynamic, 1>;
 
 /* An enum to hold the type of activation function for the layer. */
 enum class Activation { None, ReLU };
@@ -34,11 +37,7 @@ class Layer {
 
         /* The layer can be applied as a function to an input vector,
          * return the result. */
-        container operator()(const container &input) const;
-        /* Apply the layer multiplication */
-        container mult(const container &input) const;
-        /* Returns the transpose of the weights and biases */
-        container transp(const container &input) const;
+        Vect operator()(const Vect &input) const;
 
         auto nodes() const { return nodes_p; }
         auto input() const { return fanin; }
@@ -51,8 +50,8 @@ class Layer {
     private:
         const std::size_t fanin;
         const std::size_t nodes_p;
-        container weights_p;
-        container bias_p;
+        Matr weights_p;
+        Vect bias_p;
         Activation activation_p;
 };
 

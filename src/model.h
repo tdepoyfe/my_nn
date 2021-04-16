@@ -28,33 +28,28 @@ class Model {
         /* Set the loss function */
         void setLoss(LossFunction loss) { loss_p = loss; }
         /* Apply the model to some input */
-        container operator()(const container &input) const;
+        Vect operator()(const Vect &input) const;
         /* Compute the loss function on the difference between the result
          * of applying the model to `input` and the provided `targets`.
          */
-        elem_type score(const container &input, const container &targets) const;
+        elem_type score(const Vect &input, const Vect &targets) const;
 
         /* Backpropagates on one input to compute the gradient. 
          * Assumes the right pairing between output activation and loss.
          */
-        std::vector<container> gradient(
-                const container &input, const container & targets) const;
-        /* Modify a layer's weights and biases */
-        void add_to_weights(const std::vector<container> variations);
-        /* Modify a layer's weights and biases */
-        void remove_from_weights(const std::vector<container> variations);
+        std::vector<std::pair<Matr, Vect>> gradient(
+                const Vect &input, const Vect &targets) const;
         /* Training schedule. Recieves labeled instances and number of epochs.
          * Uses stochastic gradient descent for now.
          */
-        void train(const std::vector<std::pair<container, container>> instances,
+        void train(const std::vector<std::pair<Vect, Vect>> instances,
                 std::size_t epochs);
 
-        /* Accessor function to specific layers */
+        /* Accessor functions to specific layers */
         const Layer &get_layer(std::size_t index) const { return layers[index]; }
+        Layer &get_layer(std::size_t index) { return layers[index]; }
         /* Accessor function to loss type */
         LossFunction loss() const { return loss_p; }
-        /* Total number of nodes */
-        std::size_t node_number() const;
     private:
         const std::size_t input_size;
         std::vector<Layer> layers;

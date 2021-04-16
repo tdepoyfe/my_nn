@@ -14,7 +14,7 @@ using namespace my_nn;
 TEST(Layer, LayerConstruct) {
     ASSERT_NO_THROW({ 
         Layer l(1, 1);
-        double x = l.weights()[0];
+        double x = l.weights()(0,0);
     });
     SUCCEED();
 }
@@ -23,7 +23,7 @@ TEST(Layer, LayerConstruct) {
  */
 TEST(Layer, Layer0Stable) {
     Layer l(100, 100, Activation::ReLU);
-    container input(0.0, 100);
+    Vect input = Vect::Constant(100, 0.0);
     auto output = l(input);
     for (double x : output) {
         ASSERT_NEAR(x, 0.0, 1e-10); // Using assert_near to do absolute error since we compare with 0.
