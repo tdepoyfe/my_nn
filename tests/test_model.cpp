@@ -16,9 +16,9 @@ using namespace my_nn;
 TEST(Model, ModelConstruct) {
     ASSERT_NO_THROW({ 
         Model m(5);
-        m.addLayer(5, Activation::ReLU);
-        m.addLayer(3, Activation::ReLU);
-        m.addLayer(1);
+        m.add_layer(5, Activation::ReLU);
+        m.add_layer(3, Activation::ReLU);
+        m.add_layer(1);
         auto l = m.get_layer(0);
         double x = l.weights()(0, 0);
     });
@@ -29,22 +29,22 @@ TEST(Model, ModelConstruct) {
 TEST(Model, ModelLoss) {
     ASSERT_NO_THROW({
         Model m(100);
-        m.addLayer(100, Activation::ReLU);
-        m.addLayer(50, Activation::ReLU);
-        m.addLayer(1);
-        m.setLoss(LossFunction::LstSq);
+        m.add_layer(100, Activation::ReLU);
+        m.add_layer(50, Activation::ReLU);
+        m.add_layer(1);
+        m.set_loss(LossFunction::LstSq);
     });
 }
 
 /* Check that mapping works and send 0 to 0 */
 TEST(Model, Model0Stable) {
     Model m(100);
-    m.addLayer(100, Activation::ReLU);
-    m.addLayer(50, Activation::ReLU);
-    m.addLayer(1);
-    m.setLoss(LossFunction::LstSq);
-    Vect input = Vect::Constant(100, 0.0);
-    Vect labels = Vect::Constant(1, 0.0);
+    m.add_layer(100, Activation::ReLU);
+    m.add_layer(50, Activation::ReLU);
+    m.add_layer(1);
+    m.set_loss(LossFunction::LstSq);
+    Vector input = Vector::Constant(100, 0.0);
+    Vector labels = Vector::Constant(1, 0.0);
     auto output = m(input);
     for (double x : output) {
         ASSERT_NEAR(x, 0.0, 1e-100);
@@ -58,11 +58,11 @@ TEST(Model, Model0Stable) {
 TEST(Model, ModelGradient) {
     elem_type epsilon = 0.01;
     Model m(1);
-    m.addLayer(100, Activation::ReLU);
-    m.addLayer(1);
-    m.setLoss(LossFunction::LstSq);
-    Vect input = Vect::Constant(1, 0.5);
-    Vect label = Vect::Constant(1, 0.5);
+    m.add_layer(100, Activation::ReLU);
+    m.add_layer(1);
+    m.set_loss(LossFunction::LstSq);
+    Vector input = Vector::Constant(1, 0.5);
+    Vector label = Vector::Constant(1, 0.5);
     auto output = m.score(input, label);
     auto gradient = m.gradient(input, label)[0].first(0,0);
     m.get_layer(0).weights()(0,0) += epsilon;
@@ -75,21 +75,21 @@ TEST(Model, ModelGradient) {
 TEST(Model, ModelTraining) {
     // Model
     Model m(1);
-    m.addLayer(10, Activation::ReLU);
-    m.addLayer(1);
-    m.setLoss(LossFunction::LstSq);
+    m.add_layer(10, Activation::ReLU);
+    m.add_layer(1);
+    m.set_loss(LossFunction::LstSq);
 
     // Dataset
     std::default_random_engine generator;
     std::uniform_real_distribution<elem_type> distribution_x(0.0, 1.0);
     std::normal_distribution<elem_type> distribution_noise(0.0, 0.01);
-    std::vector<std::pair<Vect, Vect>> data(100);
+    std::vector<std::pair<Vector, Vector>> data(100);
     for (auto &instance : data) {
         auto x = distribution_x(generator);
         auto y = x*x + 1.0 + distribution_noise(generator);
-        Vect input(1);
+        Vector input(1);
         input << x;
-        Vect label(1);
+        Vector label(1);
         label << y;
         instance = std::pair(input, label);
     }

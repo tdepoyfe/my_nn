@@ -12,9 +12,10 @@
 namespace my_nn {
 
 using elem_type = double;
-// a matrix with dynamically assigned dimensions.
-using Matr = Eigen::Matrix<elem_type, Eigen::Dynamic, Eigen::Dynamic>;
-using Vect = Eigen::Matrix<elem_type, Eigen::Dynamic, 1>;
+// matrix and vector with dynamically assigned dimensions. Might become
+// parameters at some point.
+using Matrix = Eigen::Matrix<elem_type, Eigen::Dynamic, Eigen::Dynamic>;
+using Vector = Eigen::Matrix<elem_type, Eigen::Dynamic, 1>;
 
 /* An enum to hold the type of activation function for the layer. */
 enum class Activation { None, ReLU };
@@ -37,21 +38,21 @@ class Layer {
 
         /* The layer can be applied as a function to an input vector,
          * return the result. */
-        Vect operator()(const Vect &input) const;
+        Vector operator()(const Vector &input) const;
 
-        auto nodes() const { return nodes_p; }
-        auto input() const { return fanin; }
-        const auto &weights() const { return weights_p; }
-        auto &weights() { return weights_p; }
-        const auto &bias() const { return bias_p; }
-        auto &bias() { return bias_p; }
-        auto activation() const { return activation_p; }
+        std::size_t nodes() const { return nodes_p; }
+        std::size_t input() const { return fanin; }
+        const Matrix &weights() const { return weights_p; }
+        Matrix &weights() { return weights_p; }
+        const Vector &bias() const { return bias_p; }
+        Vector &bias() { return bias_p; }
+        Activation activation() const { return activation_p; }
         
     private:
         const std::size_t fanin;
         const std::size_t nodes_p;
-        Matr weights_p;
-        Vect bias_p;
+        Matrix weights_p;
+        Vector bias_p;
         Activation activation_p;
 };
 

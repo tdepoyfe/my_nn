@@ -13,7 +13,7 @@
 
 namespace my_nn {
 
-void Model::addLayer(std::size_t nodes, Activation activation) {
+void Model::add_layer(std::size_t nodes, Activation activation) {
     std::size_t fanin = 0;
     if (layers.size() == 0) {
         fanin = input_size;
@@ -23,7 +23,7 @@ void Model::addLayer(std::size_t nodes, Activation activation) {
     layers.push_back(Layer(fanin, nodes, activation));
 }
 
-Vect Model::operator()(const Vect &input) const {
+Vector Model::operator()(const Vector &input) const {
     auto scratch = input;
     for (const Layer &layer : layers) {
         scratch = layer(scratch);
@@ -31,7 +31,7 @@ Vect Model::operator()(const Vect &input) const {
     return scratch;
 }
 
-elem_type Model::score(const Vect &inputs, const Vect &targets) const {
+elem_type Model::score(const Vector &inputs, const Vector &targets) const {
     auto results = operator()(inputs);
     switch (loss_p) {
         case LossFunction::LstSq:
@@ -44,13 +44,13 @@ elem_type Model::score(const Vect &inputs, const Vect &targets) const {
     }
 }
 
-std::vector<std::pair<Matr, Vect>> Model::gradient(
-        const Vect &input, const Vect &targets) const
+std::vector<std::pair<Matrix, Vector>> Model::gradient(
+        const Vector &input, const Vector &targets) const
 {
     // this will store the result
-    std::vector<std::pair<Matr, Vect>> gradients(layers.size());
+    std::vector<std::pair<Matrix, Vector>> gradients(layers.size());
     // We need to store the activations of each node, then the error at each node.
-    std::vector<Vect> activations(layers.size());
+    std::vector<Vector> activations(layers.size());
     
     // forward pass
     auto scratch = input; // stores the result at the current layer
@@ -60,7 +60,7 @@ std::vector<std::pair<Matr, Vect>> Model::gradient(
         // while the bias terms don't need to be initialized. (they are 
         // implicitly equal to 1
         auto &grad = gradients[i];
-        grad.first = Matr(layer.weights().rows(), layer.weights().cols());
+        grad.first = Matrix(layer.weights().rows(), layer.weights().cols());
         for (int j = 0; j < layer.nodes(); j++) {
             grad.first.row(j) = scratch.transpose();
         }
@@ -111,7 +111,7 @@ std::vector<std::pair<Matr, Vect>> Model::gradient(
     
     return gradients;
 }
-void Model::train(const std::vector<std::pair<Vect, Vect>> instances,
+void Model::train(const std::vector<std::pair<Vector, Vector>> instances,
             std::size_t epochs) {
     auto inst_number = instances.size();
     std::default_random_engine generator;

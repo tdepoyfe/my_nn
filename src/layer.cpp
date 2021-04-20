@@ -23,10 +23,8 @@ Layer::Layer(std::size_t fanin, std::size_t nodes, Activation activation)
     weights_p(nodes, fanin), bias_p(nodes), activation_p{activation}
 {
     std::default_random_engine generator;
-    std::normal_distribution<elem_type> distribution(
-            0.0, 2 / static_cast<elem_type>(fanin)
-            );
-    for (auto &x: weights_p.reshaped()) {
+    std::normal_distribution<elem_type> distribution(0.0, 2.0 / fanin);
+    for (auto &x: weights_p.reshaped()) { // need to flatten the matrix to iterate
         x = distribution(generator);
     }
     for (auto &x : bias_p) {
@@ -37,8 +35,8 @@ Layer::Layer(std::size_t fanin, std::size_t nodes, Activation activation)
 /* Application of the layer is Matrix multiplication of the input vector by the
  * weights followed by the activation function term by term.
  */
-Vect Layer::operator()(const Vect &input) const {
-    Vect act = weights_p * input + bias_p;
+Vector Layer::operator()(const Vector &input) const {
+    Vector act = weights_p * input + bias_p;
 
     switch (activation_p) {
         case Activation::None:

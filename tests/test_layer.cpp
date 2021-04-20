@@ -23,7 +23,7 @@ TEST(Layer, LayerConstruct) {
  */
 TEST(Layer, Layer0Stable) {
     Layer l(100, 100, Activation::ReLU);
-    Vect input = Vect::Constant(100, 0.0);
+    Vector input = Vector::Constant(100, 0.0);
     auto output = l(input);
     for (double x : output) {
         ASSERT_NEAR(x, 0.0, 1e-10); // Using assert_near to do absolute error since we compare with 0.
